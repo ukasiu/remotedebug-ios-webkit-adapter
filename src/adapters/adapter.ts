@@ -33,7 +33,7 @@ export class Adapter extends EventEmitter {
         options.pollingInterval = options.pollingInterval || 3000;
         options.baseUrl = options.baseUrl || 'http://127.0.0.1';
         options.path = options.path || '/json';
-        options.port = options.port || 9222;
+        options.port = options.port || 9003;
         this._options = options;
 
         this._url = `${this._options.baseUrl}:${this._options.port}${this._options.path}`;
@@ -54,13 +54,7 @@ export class Adapter extends EventEmitter {
     public start(): Promise<any> {
         debug(`adapter.start`, this._options)
 
-        if (!this._options.proxyExePath) {
-            debug(`adapter.start: Skip spawnProcess, no proxyExePath available`)
-            return Promise.resolve(`skipped`)
-        }
-        
-        return this.spawnProcess(this._options.proxyExePath, this._options.proxyExeArgs)
-
+        return Promise.resolve()
     }
 
     public stop(): void {

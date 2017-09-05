@@ -76,21 +76,19 @@ export class IOSAdapter extends AdapterCollection {
             // Now start up all the adapters
             devices.forEach(d => {
                 const adapterId = `${this._id}_${d.deviceId}`;
-
                 if (!this._adapters.has(adapterId)) {
-                    const parts = d.url.split(':');
-                    if (parts.length > 1) {
-                        // Get the port that the ios proxy exe is forwarding for this device
-                        const port = parseInt(parts[1], 10);
 
-                        // Create a new adapter for this device and add it to our list
-                        const adapter = new Adapter(adapterId, this._proxyUrl, { port: port });
-                        adapter.start();
-                        adapter.on('socketClosed', (id) => {
-                            this.emit('socketClosed', id);
-                        });
-                        this._adapters.set(adapterId, adapter);
-                    }
+                // Get the port that the ios proxy exe is forwarding for this device
+                // const port = parseInt(parts[1], 10);
+                const port = 9003;
+
+                // Create a new adapter for this device and add it to our list
+                const adapter = new Adapter(adapterId, this._proxyUrl, { port: port });
+                adapter.start();
+                adapter.on('socketClosed', (id) => {
+                    this.emit('socketClosed', id);
+                });
+                this._adapters.set(adapterId, adapter);
                 }
             });
             return Promise.resolve(devices);
@@ -142,23 +140,7 @@ export class IOSAdapter extends AdapterCollection {
     private static getProxyPath(): Promise<string> {
         debug(`iOSAdapter.getProxyPath`)
         return new Promise((resolve, reject) => {
-            if (os.platform() === 'win32') {
-                const proxy = path.resolve(__dirname, '../../node_modules/vs-libimobile/lib/ios_webkit_debug_proxy.exe');
-                try {
-                    fs.statSync(proxy);
-                    resolve(proxy)
-                } catch (err) {
-                    reject(`ios_webkit_debug_proxy.exe not found. Please install 'npm install -g vs-libimobile'`)
-                }
-            } else if (os.platform() === 'darwin' || os.platform() === 'linux') {
-                which('ios_webkit_debug_proxy', function (err, resolvedPath) {
-                    if (err) {
-                        reject('ios_webkit_debug_proxy not found. Please install ios_webkit_debug_proxy (https://github.com/google/ios-webkit-debug-proxy)')
-                    } else {
-                        resolve(resolvedPath)
-                    }
-                })
-            }
+            resolve()
         })
     }
 
@@ -188,26 +170,13 @@ export class IOSAdapter extends AdapterCollection {
 
     private async getDeviceVersion(uuid: string): Promise<string> {
         debug(`iOSAdapter.getDeviceVersion`)
-        const _iDeviceInfoPath = await IOSAdapter.getDeviceInfoPath();
-        var proc = await execFile(_iDeviceInfoPath, ['-u', `${uuid}`, '-k', 'ProductVersion'])
 
-        let deviceVersion = ''
-        if (!proc.err) {
-            deviceVersion = proc.stdout.trim();
-        }
-
-        return deviceVersion;
+        return "10";
     };
 
     private getProtocolFor(version: string, target: Target): IOSProtocol {
         debug(`iOSAdapter.getProtocolFor`)
-        const parts = version.split('.');
-        if (parts.length > 0) {
-            const major = parseInt(parts[0], 10);
-            if (major <= 8) {
-                return new IOS8Protocol(target);
-            }
-        }
+
 
         return new IOS9Protocol(target);
     }

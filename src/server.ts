@@ -48,7 +48,7 @@ export class ProxyServer extends EventEmitter {
 
         const settings = await IOSAdapter.getProxySettings({
             proxyPath: null,
-            proxyPort: (port + 100),
+            proxyPort: 9003,
             proxyArgs: null
         });
 
